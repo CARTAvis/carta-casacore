@@ -383,24 +383,26 @@ install (FILES
         DESTINATION include/casacode/components/SpectralComponents
 )
 
-
+#
+# replace the syntax "throw(error)" with "noexcept(false)" for C++17 (or later) compiler
+#
 add_custom_target(
     modify_variant_h
-    COMMAND cp ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h ${CMAKE_SOURCE_DIR}/imageanalysis
-    COMMAND sed -e 's/throw[(]error[)]/noexcept(false)/g' ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h > ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h.tmp
-    COMMAND mv ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h.tmp ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h
+    COMMAND bash -c "cp ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h ${CMAKE_SOURCE_DIR}"
+    COMMAND bash -c "sed -e 's/throw(error)/noexcept(false)/g' ${CMAKE_SOURCE_DIR}/variant.h > ${CMAKE_SOURCE_DIR}/variant.h.tmp"
+    COMMAND bash -c "mv ${CMAKE_SOURCE_DIR}/variant.h.tmp ${CMAKE_SOURCE_DIR}/variant.h"
+    VERBATIM
 )
 
 add_dependencies(casa_imageanalysis modify_variant_h)
-
 
 install (FILES
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/xerces.h
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/Quantity.h
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/array.h
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/record.h
-         #${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h
-         variant.h
+         # ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h
+         ${CMAKE_SOURCE_DIR}/variant.h # install this revised header instead of the upper one
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/casac.h
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/version.h
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/optionparser.h
