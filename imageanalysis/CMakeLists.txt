@@ -386,6 +386,7 @@ install (FILES
 
 add_custom_target(
     modify_variant_h
+    COMMAND bash -c "rm -f ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h"
     COMMAND cp ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h ${CMAKE_SOURCE_DIR}/imageanalysis
     COMMAND sed -e 's/throw[(]error[)]/noexcept(false)/g' ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h > ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h.tmp
     COMMAND mv ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h.tmp ${CMAKE_SOURCE_DIR}/imageanalysis/variant.h
