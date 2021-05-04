@@ -50,7 +50,9 @@ enable_language (Fortran)
 # By default build only Python2 bindings
 option (BUILD_PYTHON "Build the python bindings" YES)
 option (BUILD_PYTHON3 "Build the python3 bindings" NO)
+
 option (BUILD_DEPRECATED "build and install deprecated classes (such as Map)" NO)
+option (BUILD_FFTPACK_DEPRECATED "build FFTPack" NO)
 
 # By default build shared libraries
 option (ENABLE_SHARED "Build shared libraries" YES)
@@ -102,6 +104,7 @@ if( CASA_BUILD )
    set(USE_FFTW3 ON)
    set(USE_OPENMP ON)
    set(USE_THREADS ON)
+   set(BUILD_FFTPACK_DEPRECATED ON)
    set(BUILD_PYTHON OFF)
    set(Boost_NO_BOOST_CMAKE 1)
    if (EXISTS "/opt/casa/02/include/python2.7")
@@ -601,6 +604,7 @@ message (STATUS "FFTW3 library? ........ = ${FFTW3_LIBRARIES}")
 message (STATUS "GSL library? .......... = ${GSL_LIBRARIES}")
 message (STATUS "GSL CXXFLAGS? ......... = ${CMAKE_GSL_CXX_FLAGS}")
 
+message (STATUS "BUILD_FFTPACK_DEPRECATED= ${BUILD_FFTPACK_DEPRECATED}")
 message (STATUS "BUILD_DEPRECATED ...... = ${BUILD_DEPRECATED}")
 message (STATUS "BUILD_PYTHON .......... = ${BUILD_PYTHON}")
 message (STATUS "BUILD_PYTHON3 ......... = ${BUILD_PYTHON3}")

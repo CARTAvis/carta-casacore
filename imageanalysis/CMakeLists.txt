@@ -383,16 +383,6 @@ install (FILES
         DESTINATION include/casacode/components/SpectralComponents
 )
 
-
-add_custom_target(
-    patch_stdcasa_variant
-    COMMAND sed -i.orig 's/throw[(]error[)]//g' ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/StdCasa/variant.cc
-    COMMAND rm -f ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h.orig ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/StdCasa/variant.cc.orig
-)
-
-add_dependencies(casa_imageanalysis patch_stdcasa_variant)
-
-
 install (FILES
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/xerces.h
          ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/Quantity.h
