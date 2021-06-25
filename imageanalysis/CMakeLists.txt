@@ -388,6 +388,10 @@ add_custom_target(
     patch_stdcasa_variant
     COMMAND sed -i.orig 's/throw[(]error[)]//g' ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/StdCasa/variant.cc
     COMMAND rm -f ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/variant.h.orig ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/stdcasa/StdCasa/variant.cc.orig
+	COMMAND cp ${CMAKE_SOURCE_DIR}/modified_files/ImageMoments.h ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/imageanalysis/ImageAnalysis
+	COMMAND cp ${CMAKE_SOURCE_DIR}/modified_files/ImageMoments.tcc ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/imageanalysis/ImageAnalysis
+	COMMAND cp ${CMAKE_SOURCE_DIR}/modified_files/Image2DConvolver.h ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/imageanalysis/ImageAnalysis
+	COMMAND cp ${CMAKE_SOURCE_DIR}/modified_files/Image2DConvolver.tcc ${CMAKE_SOURCE_DIR}/${CASA_CODE_PATH}/imageanalysis/ImageAnalysis
 )
 
 add_dependencies(casa_imageanalysis patch_stdcasa_variant)
