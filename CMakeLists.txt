@@ -24,7 +24,7 @@ include(CheckFunctionExists)
 include(CheckCXXSourceCompiles)
 
 # Change ~/.casarc to ~/.carta/casarc to facilitate updating the CASA measures data in CARTA.
-add_custom_target(casarc_patch
+add_custom_target(casarc_patch ALL
     COMMAND sed -i.orig 's|/.casarc:|/.carta/casarc:|g' ${CMAKE_SOURCE_DIR}/casa6/casatools/casacore/casa/System/Aipsrc.cc
 )
 
