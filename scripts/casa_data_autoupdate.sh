@@ -14,13 +14,13 @@ function check_json_settings {
     # False JSON parsing
     # Remove spaces, comma, and quotes, then replace colon with one space to get two columns of key-value pairs
     # Finally filter the key-value pair using awk and print the value (2nd column)
-    JSON_AUTO_UPDATE_CASA=$(cat $CARTA_CONFIG_FILE | sed -e 's/[",{}]//g;s/[[:space:]]//g;s/:/ /g' | awk -F" " '$1=="auto_update_casa_data" {print $2}')
+    JSON_AUTO_UPDATE_CASA=$(sed -e 's/[",{}]//g;s/[[:space:]]//g;s/:/ /g' $CARTA_CONFIG_FILE | awk -F" " '$1=="auto_update_casa_data" {print $2}' | tail -n 1)
     if [ "$JSON_AUTO_UPDATE_CASA" == "true" ]
     then
         AUTOUPDATE_ENABLED="true"
     fi
     JSON_AUTO_UPDATE_CASA_DATA_INTERVAL=0
-    JSON_AUTO_UPDATE_CASA_DATA_INTERVAL=$(cat $CARTA_CONFIG_FILE | sed -e 's/[",{}]//g;s/[[:space:]]//g;s/:/ /g' | awk -F" " '$1=="auto_update_casa_data_interval" {print $2}')
+    JSON_AUTO_UPDATE_CASA_DATA_INTERVAL=$(sed -e 's/[",{}]//g;s/[[:space:]]//g;s/:/ /g' $CARTA_CONFIG_FILE | awk -F" " '$1=="auto_update_casa_data_interval" {print $2}' | tail -n 1)
     if [ ! -z "$JSON_AUTO_UPDATE_CASA_DATA_INTERVAL" ]
     then
         if [ $JSON_AUTO_UPDATE_CASA_DATA_INTERVAL -gt 0 ]
