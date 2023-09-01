@@ -17,19 +17,20 @@ endif()
 add_definitions( -DDBUS_CPP )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-cmake_minimum_required (VERSION 2.6.0)
+cmake_minimum_required (VERSION 3.3.0)
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
 include(CheckCXXSourceCompiles)
+include(casa6/casatools/casacore/cmake/PCHSupport.cmake)
 
 # Change ~/.casarc to ~/.carta-casacore/casarc to facilitate updating the CASA measures data in CARTA.
 add_custom_target(casarc_patch ALL
     COMMAND sed -i.orig 's|/.casarc:|/.carta-casacore/casarc:|g' ${CMAKE_SOURCE_DIR}/casa6/casatools/casacore/casa/System/Aipsrc.cc
 )
 # fixes warnings on cmake 3.x+ For now we want the old behavior to be backwards compatible
-if (POLICY CMP0048)
-    cmake_policy (SET CMP0048 OLD)
+if (POLICY CMP0115)
+	cmake_policy (SET CMP0115 NEW)
 endif()
 
 # Enable <packageName>_ROOT variables for recent versions of CMake
@@ -44,7 +45,7 @@ set(PROJECT_VERSION
   "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
 # Increment the PROJECT_SOVERSION every time you update VERSION_MINOR!
-SET(PROJECT_SOVERSION 6)
+SET(PROJECT_SOVERSION 7)
 
 SET(NO_SOVERSION FALSE CACHE BOOL "do not add version information to shared libraries")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -596,6 +597,7 @@ message (STATUS "BUILD_SHARED_LIBS ..... = ${BUILD_SHARED_LIBS}")
 message (STATUS "ENABLE_RPATH .......... = ${ENABLE_RPATH}")
 message (STATUS "CMAKE_INSTALL_NAME_DIR  = ${CMAKE_INSTALL_NAME_DIR}")
 message (STATUS "ENABLE_TABLELOCKING ... = ${ENABLE_TABLELOCKING}")
+message (STATUS "USE_PCH ............... = ${USE_PCH}")
 message (STATUS "USE_THREADS ........... = ${USE_THREADS}")
 message (STATUS "USE_OPENMP ............ = ${USE_OPENMP}")
 message (STATUS "USE_MPI ............... = ${USE_MPI}")
