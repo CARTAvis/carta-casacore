@@ -15,9 +15,10 @@ if (EXISTS /opt/casa/03/lib)
 endif()
 
 add_definitions( -DDBUS_CPP )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-cmake_minimum_required (VERSION 3.3.0)
+cmake_minimum_required (VERSION 3.14.0)
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
@@ -39,13 +40,13 @@ if (POLICY CMP0074)
 endif()
 
 set(PROJECT_VERSION_MAJOR 3)
-set(PROJECT_VERSION_MINOR 5)
-set(PROJECT_VERSION_PATCH 0)
+set(PROJECT_VERSION_MINOR 6)
+set(PROJECT_VERSION_PATCH 1)
 set(PROJECT_VERSION
   "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
 # Increment the PROJECT_SOVERSION every time you update VERSION_MINOR!
-SET(PROJECT_SOVERSION 7)
+SET(PROJECT_SOVERSION 8)
 
 SET(NO_SOVERSION FALSE CACHE BOOL "do not add version information to shared libraries")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -222,13 +223,13 @@ if (NOT CMAKE_BUILD_TYPE)
     endif(_cmpvar STREQUAL "dbg" OR _cmpvar STREQUAL "debug")
 endif (NOT CMAKE_BUILD_TYPE)
 
-# Detect if the compiler supports C++11 if we want to use it.
-check_cxx_compiler_flag(-std=c++11 HAS_CXX11)
-if (HAS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# Detect if the compiler supports C++17 if we want to use it.
+check_cxx_compiler_flag(-std=c++17 HAS_CXX17)
+if (HAS_CXX17)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 else()
-    message(FATAL_ERROR "Casacore build requires a c++11 compatible compiler")
-endif (HAS_CXX11)
+    message(FATAL_ERROR "Casacore build requires a c++17 compatible compiler")
+endif (HAS_CXX17)
 
 # use faster fortran rules for complex operations, removes restoring complex
 # infinities if naive computation results in NAN + NAN * I
