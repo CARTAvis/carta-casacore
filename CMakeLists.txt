@@ -25,12 +25,6 @@ if (POLICY CMP0074)
     cmake_policy (SET CMP0074 NEW)
 endif()
 
-set(PROJECT_VERSION_MAJOR 3)
-set(PROJECT_VERSION_MINOR 8)
-set(PROJECT_VERSION_PATCH 0)
-set(PROJECT_VERSION
-  "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-
 # Increment the PROJECT_SOVERSION every time you update VERSION_MINOR!
 SET(PROJECT_SOVERSION 9)
 
@@ -44,8 +38,6 @@ set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_PACKAGE_CONTACT "Malte Marquarding") #required
 set(CPACK_PACKAGE_VENDOR "https://github.com/casacore/casacore")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Astronomical data processing library")
-
-enable_language (Fortran)
 
 option (BUILD_DEPRECATED "build and install deprecated classes (such as Map)" NO)
 option (BUILD_FFTPACK_DEPRECATED "build FFTPack" NO)
@@ -66,7 +58,7 @@ if (HAVE_O_DIRECT)
     add_definitions(-DHAVE_O_DIRECT)
 endif()
 
-# By default do not use ADIOS2, HDF5, FFTW3
+# By default do not use ADIOS2, HDF5
 option (ENABLE_TABLELOCKING "Make locking for concurrent table access possible" YES)
 option (USE_READLINE "Build readline support" YES)
 option (USE_ADIOS2 "Build ADIOS2 " NO)
@@ -214,7 +206,9 @@ set (_modules ${_modules} ${_modules2})
 # Determine which external packages to use.
 include (CTest)
 
-if (_use_fortran)
+if (_usefortran)
+  enable_language (Fortran)
+
   # use faster fortran rules for complex operations, removes restoring complex
   # infinities if naive computation results in NAN + NAN * I
   #Handling complex multiplication and division with correct treating of complex
@@ -240,12 +234,6 @@ if (_use_fortran)
   #by about 20%.
   # For one reason or another the check on the compiler flag has no
   # effect; it still adds the option which fails for clang.
-  # Decrease test timeout. Valgrind times are excessive and need much more.
-  #set (CTEST_TEST_TIMEOUT 150 CACHE STRING
-  #    "Maximum ctest -S time allowed before CTest will kill the test." FORCE)
-  # Already a cache var. It can be overridden using ctest --timeout N
-  #set (DART_TESTING_TIMEOUT 150 CACHE STRING
-  #    "Maximum ctest time allowed before CTest will kill the test." FORCE)
   if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
       check_cxx_compiler_flag(-fcx-fortran-rules HAS_GXX_FORTRAN_RULES)
       check_c_compiler_flag(-fcx-fortran-rules HAS_GCC_FORTRAN_RULES)
@@ -405,7 +393,7 @@ if(USE_THREADS)
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
         else()
             message(FATAL_ERROR "${_errmsg} (${CMAKE_C_COMPILER_ID}): ${CMAKE_C_COMPILER}")
-    endif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        endif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     endif(CMAKE_COMPILER_IS_GNUCC)
     if(CMAKE_COMPILER_IS_GNUCXX)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
@@ -465,19 +453,11 @@ endif (NOT BUILD_TESTING)
 # If the minor version has changed, bump this:
 set( CASA_PROJECT_SOVERSION   7   )
 
-# Determine the SOVERSION and define as compile variable.
-if (casa_soversion)
-    set (LIB_VERSION "${casa_soversion}")
-    set (LIB_SOVERSION "${casa_soversion}")
-    set (CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" )
-    set (CASA_LIB_VERSION "${casa_soversion}")
-    set (CASA_LIB_SOVERSION "${casa_soversion}")
-else( )
-    set (LIB_VERSION "${PROJECT_SOVERSION}")
-    set (LIB_SOVERSION "${PROJECT_SOVERSION}")
-    set (CASA_LIB_VERSION "${CASA_PROJECT_SOVERSION}")
-    set (CASA_LIB_SOVERSION "${CASA_PROJECT_SOVERSION}")
-endif( )
+# Define SOVERSION as compile variable.
+set (LIB_VERSION "${PROJECT_SOVERSION}")
+set (LIB_SOVERSION "${PROJECT_SOVERSION}")
+set (CASA_LIB_VERSION "${CASA_PROJECT_SOVERSION}")
+set (CASA_LIB_SOVERSION "${CASA_PROJECT_SOVERSION}")
 
 # Add the modules to be built.
 add_subdirectory (casa6/casatools/casacore/build-tools)
@@ -537,8 +517,8 @@ message (STATUS "LAPACK library? ....... = ${LAPACK_LIBRARIES}")
 message (STATUS "WCS library? .......... = ${WCSLIB_LIBRARIES}")
 message (STATUS "SOFA library? ......... = ${SOFA_LIBRARIES}")
 message (STATUS "CFitsio library? ...... = ${CFITSIO_LIBRARIES}")
-message (STATUS "ADIOS2 library? ....... = ${ADIOS2_LIBRARIES}")
-message (STATUS "HDF5 library? ......... = ${HDF5_hdf5_LIBRARY}")
+message (STATUS "ADIOS2 library? ....... = ${CASACORE_ADIOS2_LIBRARIES}")
+message (STATUS "HDF5 library? ......... = ${HDF5_C_LIBRARY_hdf5}")
 message (STATUS "FFTW3 library? ........ = ${FFTW3_LIBRARIES}")
 
 message (STATUS "BUILD_FFTPACK_DEPRECATED= ${BUILD_FFTPACK_DEPRECATED}")
