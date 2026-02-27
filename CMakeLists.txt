@@ -43,6 +43,7 @@ option (BUILD_DEPRECATED "build and install deprecated classes (such as Map)" NO
 option (BUILD_FFTPACK_DEPRECATED "build FFTPack" NO)
 option (BUILD_DYSCO "Build the Dysco compression storage manager" YES)
 option (BUILD_SISCO "Build the Sisco compression storage manager" NO)
+option (BUILD_TESTING "Enable build of the unit tests" NO)
 
 # By default build shared libraries
 option (ENABLE_SHARED "Build shared libraries" YES)
@@ -58,13 +59,13 @@ if (HAVE_O_DIRECT)
     add_definitions(-DHAVE_O_DIRECT)
 endif()
 
-# By default do not use ADIOS2, HDF5
+# By default do not use ADIOS2
 option (ENABLE_TABLELOCKING "Make locking for concurrent table access possible" YES)
 option (USE_READLINE "Build readline support" YES)
 option (USE_ADIOS2 "Build ADIOS2 " NO)
-option (USE_HDF5 "Build HDF5 " NO)
+option (USE_HDF5 "Build HDF5 " YES)
 option (USE_THREADS "Use Mutex thread synchronization" YES)
-option (USE_OPENMP "Use OpenMP threading" NO)
+option (USE_OPENMP "Use OpenMP threading" YES)
 option (USE_MPI "Use MPI for parallel IO" NO)
 option (USE_STACKTRACE "Show stacktrace in case of exception" NO)
 
@@ -324,6 +325,13 @@ if (HDF5_FOUND)
     ##include_directories (BEFORE ${HDF5_INCLUDE_DIRS})
     include_directories (${HDF5_INCLUDE_DIRS})
     add_definitions(-DHAVE_HDF5)
+    if (DEFINED "HDF5_hdf5_LIBRARY")
+        set(_hdf5_library "${HDF5_hdf5_LIBRARY}")
+    elseif (DEFINED "HDF5_C_LIBRARY")
+        set(_hdf5_library "${HDF5_C_LIBRARY}")
+    elseif (DEFINED "HDF5_C_LIBRARY_hdf5")
+        set(_hdf5_library "${HDF5_C_LIBRARY_hdf5}")
+    endif ()
 endif (HDF5_FOUND)
 
 include_directories (${FFTW3_INCLUDE_DIRS})
@@ -495,6 +503,7 @@ install(
 # Show summary.
 message (STATUS "CMAKE_SYSTEM .......... = ${CMAKE_SYSTEM}")
 message (STATUS "CMAKE_BUILD_TYPE ...... = ${CMAKE_BUILD_TYPE}")
+message (STATUS "UseCcache ............. = ${UseCcache}")
 message (STATUS "Modules to be built ... = ${_modules}")
 message (STATUS "BUILD_SHARED_LIBS ..... = ${BUILD_SHARED_LIBS}")
 message (STATUS "ENABLE_RPATH .......... = ${ENABLE_RPATH}")
@@ -517,8 +526,8 @@ message (STATUS "LAPACK library? ....... = ${LAPACK_LIBRARIES}")
 message (STATUS "WCS library? .......... = ${WCSLIB_LIBRARIES}")
 message (STATUS "SOFA library? ......... = ${SOFA_LIBRARIES}")
 message (STATUS "CFitsio library? ...... = ${CFITSIO_LIBRARIES}")
-message (STATUS "ADIOS2 library? ....... = ${CASACORE_ADIOS2_LIBRARIES}")
-message (STATUS "HDF5 library? ......... = ${HDF5_C_LIBRARY_hdf5}")
+message (STATUS "ADIOS2 library? ....... = ${CASACORE_ADIOS_LIBRARY}")
+message (STATUS "HDF5 library? ......... = ${_hdf5_library}")
 message (STATUS "FFTW3 library? ........ = ${FFTW3_LIBRARIES}")
 
 message (STATUS "BUILD_FFTPACK_DEPRECATED= ${BUILD_FFTPACK_DEPRECATED}")
@@ -527,16 +536,18 @@ message (STATUS "BUILD_DYSCO ........... = ${BUILD_DYSCO}")
 message (STATUS "BUILD_SISCO ........... = ${BUILD_SISCO}")
 
 # List of build variables and defaults.
-#  BUILD_DEPRECATED              NO
 #  ENABLE_SHARED                 YES
 #  ENABLE_RPATH                  YES
 #  ENABLE_TABLELOCKING           YES
 #  USE_ADIOS2                    NO
-#  USE_HDF5                      NO
+#  USE_HDF5                      YES
 #  USE_THREADS                   YES
-#  USE_OPENMP                    NO
+#  USE_OPENMP                    YES
 #  USE_MPI                       NO
 #  USE_STACKTRACE                NO
+#  BUILD_DEPRECATED              NO
+#  BUILD_TESTING                 NO
+#  UseCache                      NO
 #  DATA_DIR                      ${CMAKE_INSTALL_PREFIX}/share/casacore/data
 #  MODULE                        all
 #                                Possible value for MODULE (previous built too):
