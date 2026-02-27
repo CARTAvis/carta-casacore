@@ -2,14 +2,18 @@ cmake_minimum_required (VERSION 3.14.0)
 
 project(casacore VERSION 3.8.0)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/casa6/casatools/casacore/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include_directories( BEFORE ${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_CURRENT_LIST_DIR}/casa6/casatools/casacore" "${CMAKE_CURRENT_LIST_DIR}/casa6/casatools/src/code")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
 include(CheckCXXSourceCompiles)
 include(casa6/casatools/casacore/cmake/PCHSupport.cmake)
+include(cmake/ImageAnalysis.cmake)
 
 # Change ~/.casarc to ~/.carta-casacore/casarc to facilitate updating the CASA measures data in CARTA.
 add_custom_target(casarc_patch ALL
@@ -58,15 +62,16 @@ if (HAVE_O_DIRECT)
     add_definitions(-DHAVE_O_DIRECT)
 endif()
 
-# By default do not use ADIOS2, HDF5
+# By default do not use ADIOS2, MPI, or STACKTRACE
 option (ENABLE_TABLELOCKING "Make locking for concurrent table access possible" YES)
 option (USE_READLINE "Build readline support" YES)
 option (USE_ADIOS2 "Build ADIOS2 " NO)
-option (USE_HDF5 "Build HDF5 " NO)
+option (USE_HDF5 "Build HDF5 " YES)
 option (USE_THREADS "Use Mutex thread synchronization" YES)
-option (USE_OPENMP "Use OpenMP threading" NO)
+option (USE_OPENMP "Use OpenMP threading" YES)
 option (USE_MPI "Use MPI for parallel IO" NO)
 option (USE_STACKTRACE "Show stacktrace in case of exception" NO)
+option (BUILD_TESTING "Enable build of the unit tests" NO)
 
 set(CASA_DEFAULT_ALIGNMENT "32" CACHE STRING "Default alignment of casa::AlignedAllocator")
 
@@ -324,6 +329,13 @@ if (HDF5_FOUND)
     ##include_directories (BEFORE ${HDF5_INCLUDE_DIRS})
     include_directories (${HDF5_INCLUDE_DIRS})
     add_definitions(-DHAVE_HDF5)
+    if (DEFINED "HDF5_hdf5_LIBRARY")
+        set(_hdf5_location "${HDF5_hdf5_LIBRARY}")
+    elseif (DEFINED "HDF5_C_LIBRARY")
+        set(_hdf5_location "${HDF5_C_LIBRARY}")
+    elseif (DEFINED "HDF5_C_LIBRARY_hdf5")
+        set(_hdf5_location "${HDF5_C_LIBRARY_hdf5}")
+    endif ()
 endif (HDF5_FOUND)
 
 include_directories (${FFTW3_INCLUDE_DIRS})
@@ -366,6 +378,8 @@ endif(USE_MPI)
 if(USE_OPENMP)
     set (USE_THREADS YES)
     find_package (OpenMP)
+    message (STATUS "OpenMP_CXX_INCLUDE_DIRS=${OpenMP_CXX_INCLUDE_DIRS}")
+    message (STATUS "OpenMP_CXX_LIB_NAMES=${OpenMP_CXX_LIB_NAMES}")
     if (OPENMP_FOUND)
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -qopenmp")
@@ -461,7 +475,7 @@ set (CASA_LIB_SOVERSION "${CASA_PROJECT_SOVERSION}")
 
 # Add the modules to be built.
 add_subdirectory (casa6/casatools/casacore/build-tools)
-add_subdirectory (imageanalysis)
+#add_subdirectory (imageanalysis)
 foreach (module ${_modules})
     add_subdirectory (casa6/casatools/casacore/${module})
     set_target_properties(
@@ -495,6 +509,7 @@ install(
 # Show summary.
 message (STATUS "CMAKE_SYSTEM .......... = ${CMAKE_SYSTEM}")
 message (STATUS "CMAKE_BUILD_TYPE ...... = ${CMAKE_BUILD_TYPE}")
+message (STATUS "UseCcache ............. = ${UseCcache}")
 message (STATUS "Modules to be built ... = ${_modules}")
 message (STATUS "BUILD_SHARED_LIBS ..... = ${BUILD_SHARED_LIBS}")
 message (STATUS "ENABLE_RPATH .......... = ${ENABLE_RPATH}")
@@ -505,6 +520,11 @@ message (STATUS "USE_THREADS ........... = ${USE_THREADS}")
 message (STATUS "USE_OPENMP ............ = ${USE_OPENMP}")
 message (STATUS "USE_MPI ............... = ${USE_MPI}")
 message (STATUS "USE_STACKTRACE ........ = ${USE_STACKTRACE}")
+message (STATUS "BUILD_FFTPACK_DEPRECATED= ${BUILD_FFTPACK_DEPRECATED}")
+message (STATUS "BUILD_DEPRECATED ...... = ${BUILD_DEPRECATED}")
+message (STATUS "BUILD_DYSCO ........... = ${BUILD_DYSCO}")
+message (STATUS "BUILD_SISCO ........... = ${BUILD_SISCO}")
+message (STATUS "BUILD_TESTING ......... = ${BUILD_TESTING}")
 message (STATUS "HAVE_O_DIRECT ......... = ${HAVE_O_DIRECT}")
 message (STATUS "CMAKE_CXX_COMPILER .... = ${CMAKE_CXX_COMPILER}")
 message (STATUS "CMAKE_CXX_FLAGS ....... = ${CMAKE_CXX_FLAGS}")
@@ -517,14 +537,9 @@ message (STATUS "LAPACK library? ....... = ${LAPACK_LIBRARIES}")
 message (STATUS "WCS library? .......... = ${WCSLIB_LIBRARIES}")
 message (STATUS "SOFA library? ......... = ${SOFA_LIBRARIES}")
 message (STATUS "CFitsio library? ...... = ${CFITSIO_LIBRARIES}")
-message (STATUS "ADIOS2 library? ....... = ${CASACORE_ADIOS2_LIBRARIES}")
-message (STATUS "HDF5 library? ......... = ${HDF5_C_LIBRARY_hdf5}")
+message (STATUS "ADIOS2 library? ....... = ${CASACORE_ADIOS_LIBRARY}")
+message (STATUS "HDF5 library? ......... = ${_hdf5_location}")
 message (STATUS "FFTW3 library? ........ = ${FFTW3_LIBRARIES}")
-
-message (STATUS "BUILD_FFTPACK_DEPRECATED= ${BUILD_FFTPACK_DEPRECATED}")
-message (STATUS "BUILD_DEPRECATED ...... = ${BUILD_DEPRECATED}")
-message (STATUS "BUILD_DYSCO ........... = ${BUILD_DYSCO}")
-message (STATUS "BUILD_SISCO ........... = ${BUILD_SISCO}")
 
 # List of build variables and defaults.
 #  BUILD_DEPRECATED              NO
@@ -532,11 +547,13 @@ message (STATUS "BUILD_SISCO ........... = ${BUILD_SISCO}")
 #  ENABLE_RPATH                  YES
 #  ENABLE_TABLELOCKING           YES
 #  USE_ADIOS2                    NO
-#  USE_HDF5                      NO
+#  USE_HDF5                      YES
 #  USE_THREADS                   YES
-#  USE_OPENMP                    NO
+#  USE_OPENMP                    YES
 #  USE_MPI                       NO
 #  USE_STACKTRACE                NO
+#  BUILD_TESTING                 NO
+#  UseCcache                     NO
 #  DATA_DIR                      ${CMAKE_INSTALL_PREFIX}/share/casacore/data
 #  MODULE                        all
 #                                Possible value for MODULE (previous built too):
