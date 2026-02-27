@@ -330,11 +330,11 @@ if (HDF5_FOUND)
     include_directories (${HDF5_INCLUDE_DIRS})
     add_definitions(-DHAVE_HDF5)
     if (DEFINED "HDF5_hdf5_LIBRARY")
-        set(_hdf5_location "${HDF5_hdf5_LIBRARY}")
+        set(_hdf5_library "${HDF5_hdf5_LIBRARY}")
     elseif (DEFINED "HDF5_C_LIBRARY")
-        set(_hdf5_location "${HDF5_C_LIBRARY}")
+        set(_hdf5_library "${HDF5_C_LIBRARY}")
     elseif (DEFINED "HDF5_C_LIBRARY_hdf5")
-        set(_hdf5_location "${HDF5_C_LIBRARY_hdf5}")
+        set(_hdf5_library "${HDF5_C_LIBRARY_hdf5}")
     endif ()
 endif (HDF5_FOUND)
 
@@ -378,8 +378,6 @@ endif(USE_MPI)
 if(USE_OPENMP)
     set (USE_THREADS YES)
     find_package (OpenMP)
-    message (STATUS "OpenMP_CXX_INCLUDE_DIRS=${OpenMP_CXX_INCLUDE_DIRS}")
-    message (STATUS "OpenMP_CXX_LIB_NAMES=${OpenMP_CXX_LIB_NAMES}")
     if (OPENMP_FOUND)
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -qopenmp")
@@ -538,11 +536,10 @@ message (STATUS "WCS library? .......... = ${WCSLIB_LIBRARIES}")
 message (STATUS "SOFA library? ......... = ${SOFA_LIBRARIES}")
 message (STATUS "CFitsio library? ...... = ${CFITSIO_LIBRARIES}")
 message (STATUS "ADIOS2 library? ....... = ${CASACORE_ADIOS_LIBRARY}")
-message (STATUS "HDF5 library? ......... = ${_hdf5_location}")
+message (STATUS "HDF5 library? ......... = ${_hdf5_library}")
 message (STATUS "FFTW3 library? ........ = ${FFTW3_LIBRARIES}")
 
 # List of build variables and defaults.
-#  BUILD_DEPRECATED              NO
 #  ENABLE_SHARED                 YES
 #  ENABLE_RPATH                  YES
 #  ENABLE_TABLELOCKING           YES
@@ -552,6 +549,7 @@ message (STATUS "FFTW3 library? ........ = ${FFTW3_LIBRARIES}")
 #  USE_OPENMP                    YES
 #  USE_MPI                       NO
 #  USE_STACKTRACE                NO
+#  BUILD_DEPRECATED              NO
 #  BUILD_TESTING                 NO
 #  UseCcache                     NO
 #  DATA_DIR                      ${CMAKE_INSTALL_PREFIX}/share/casacore/data
