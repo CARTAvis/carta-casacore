@@ -28,7 +28,9 @@ foreach (_subdir imageanalysis casatools components stdcasa)
     install(DIRECTORY ${_path}
         DESTINATION include/casacode/
         FILES_MATCHING
-        REGEX "/.*(h|tcc|hpp)$")
+        REGEX "/.*(h|tcc|hpp)$"
+        PATTERN "test" EXCLUDE
+    )
 
 endforeach (_subdir)
 
