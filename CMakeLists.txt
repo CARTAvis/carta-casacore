@@ -13,7 +13,6 @@ include(CheckCCompilerFlag)
 include(CheckFunctionExists)
 include(CheckCXXSourceCompiles)
 include(casa6/casatools/casacore/cmake/PCHSupport.cmake)
-include(cmake/ImageAnalysis.cmake)
 
 # Change ~/.casarc to ~/.carta-casacore/casarc to facilitate updating the CASA measures data in CARTA.
 add_custom_target(casarc_patch ALL
@@ -460,20 +459,12 @@ if (NOT BUILD_TESTING)
     set(EXCL_ALL EXCLUDE_FROM_ALL)
 endif (NOT BUILD_TESTING)
 
-# Custom SOVERSION for imageanalysis is derived from the casa minor version rather than the casacore minor version.
-# Check git tags for CASA version (currently 6.7.5)
-# If the minor version has changed, bump this:
-set( CASA_PROJECT_SOVERSION   7   )
-
 # Define SOVERSION as compile variable.
 set (LIB_VERSION "${PROJECT_SOVERSION}")
 set (LIB_SOVERSION "${PROJECT_SOVERSION}")
-set (CASA_LIB_VERSION "${CASA_PROJECT_SOVERSION}")
-set (CASA_LIB_SOVERSION "${CASA_PROJECT_SOVERSION}")
 
 # Add the modules to be built.
 add_subdirectory (casa6/casatools/casacore/build-tools)
-#add_subdirectory (imageanalysis)
 foreach (module ${_modules})
     add_subdirectory (casa6/casatools/casacore/${module})
     set_target_properties(
@@ -490,12 +481,8 @@ foreach (module ${_modules})
     set(PRIVATE_LIBS "${PRIVATE_LIBS} -lcasa_${module}")
 endforeach (module)
 
-set_target_properties(
-      casa_imageanalysis
-      PROPERTIES
-          VERSION "${CASA_LIB_VERSION}"
-          SOVERSION "${CASA_LIB_SOVERSION}"
-)
+# Add custom imageanalysis component
+add_subdirectory (imageanalysis)
 
 install(
     FILES scripts/casa_data_autoupdate.sh

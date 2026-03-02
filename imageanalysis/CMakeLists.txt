@@ -1,5 +1,8 @@
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
+# GSL dependency
+find_package(GSL REQUIRED)
+
 set(_casa_code_path "${CMAKE_SOURCE_DIR}/casa6/casatools/src/code")
 set(_all_sources)
 set(_all_headers)
@@ -31,26 +34,38 @@ endforeach (_subdir)
 
 add_library (casa_imageanalysis)
 
+# Custom SOVERSION for imageanalysis is derived from the casa minor version rather than the casacore minor version.
+# Base CASA uses different values, but we should continue using our convention for consistency.
+# Check git tags for CASA version (currently 6.7.5)
+# If the minor version has changed, bump this:
+set(CASA_PROJECT_SOVERSION 7)
+
+set_target_properties(
+    casa_imageanalysis
+    PROPERTIES
+        VERSION "${CASA_PROJECT_SOVERSION}"
+        SOVERSION "${CASA_PROJECT_SOVERSION}"
+)
+
 target_sources(casa_imageanalysis
     PRIVATE 
     ${_all_sources}
     PUBLIC 
     ${_all_headers})
 
-target_link_libraries (
-casa_imageanalysis
-casa_images
-casa_coordinates
-casa_mirlib
-casa_lattices
-${CASACORE_ARCH_LIBS}
-${GSL_LIBRARIES}
+target_link_libraries (casa_imageanalysis
+    casa_images
+    casa_coordinates
+    casa_mirlib
+    casa_lattices
+    ${CASACORE_ARCH_LIBS}
+    ${GSL_LIBRARIES}
 )
 
 install (
-TARGETS casa_imageanalysis
-RUNTIME DESTINATION bin
-LIBRARY DESTINATION lib${LIB_SUFFIX}
-ARCHIVE DESTINATION lib${LIB_SUFFIX}
-LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    TARGETS casa_imageanalysis
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib${LIB_SUFFIX}
+    ARCHIVE DESTINATION lib${LIB_SUFFIX}
+    LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
