@@ -1,10 +1,12 @@
 cmake_minimum_required (VERSION 3.14.0)
 
 project(casacore VERSION 3.8.0)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/casa6/casatools/casacore/cmake")
+set(_casacore_dir "casa6/casatools/casacore")
+set(_casacore_source_dir "${CMAKE_SOURCE_DIR}/${_casacore_dir}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/${_casacore_dir}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-include_directories( BEFORE ${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_CURRENT_LIST_DIR}/casa6/casatools/casacore" "${CMAKE_CURRENT_LIST_DIR}/casa6/casatools/src/code")
+include_directories( BEFORE ${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_CURRENT_LIST_DIR}/${_casacore_dir}" "${CMAKE_CURRENT_LIST_DIR}/casa6/casatools/src/code")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
@@ -12,12 +14,20 @@ include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
 include(CheckCXXSourceCompiles)
-include(casa6/casatools/casacore/cmake/PCHSupport.cmake)
+include(${_casacore_dir}/cmake/PCHSupport.cmake)
 
 # Change ~/.casarc to ~/.carta-casacore/casarc to facilitate updating the CASA measures data in CARTA.
 add_custom_target(casarc_patch ALL
-    COMMAND sed -i.orig 's|/.casarc:|/.carta-casacore/casarc:|g' ${CMAKE_SOURCE_DIR}/casa6/casatools/casacore/casa/System/Aipsrc.cc
+    COMMAND sed -i.orig 's|/.casarc:|/.carta-casacore/casarc:|g' ${_casacore_source_dir}/casa/System/Aipsrc.cc
 )
+
+# Silence internal deprecation warnings until https://github.com/casacore/casacore/issues/1460 is fixed
+add_custom_target(pi_patch ALL
+    COMMAND sed -i.orig 's/C::pi/M_PI/g' ${_casacore_source_dir}/lattices/LatticeMath/Fit2D*
+    COMMAND sed -i.orig 's/C::pi/M_PI/g' ${_casacore_source_dir}/scimath/Functionals/Lorentzian1DParam.tcc
+    COMMAND sed -i.orig 's/C::_1_pi/M_1_PI/g' ${_casacore_source_dir}/scimath/Functionals/Lorentzian1DParam.tcc
+)
+
 # fixes warnings on cmake 3.x+ For now we want the old behavior to be backwards compatible
 if (POLICY CMP0115)
     cmake_policy (SET CMP0115 NEW)
@@ -464,9 +474,9 @@ set (LIB_VERSION "${PROJECT_SOVERSION}")
 set (LIB_SOVERSION "${PROJECT_SOVERSION}")
 
 # Add the modules to be built.
-add_subdirectory (casa6/casatools/casacore/build-tools)
+add_subdirectory (${_casacore_dir}/build-tools)
 foreach (module ${_modules})
-    add_subdirectory (casa6/casatools/casacore/${module})
+    add_subdirectory (${_casacore_dir}/${module})
     set_target_properties(
       casa_${module}
       PROPERTIES
